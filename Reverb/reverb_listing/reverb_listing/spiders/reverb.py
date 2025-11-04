@@ -30,7 +30,7 @@ class ReverbSpider(Spider):
                     'Variant Tax Code','Cost per item','Status','URL']
 
         self.output_file_name = f'output/reverb Shopify  {datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.csv'
-        self.api_key = open("proxy/proxy.txt").read().strip() #"E:/office/Reverb/reverb_listing/reverb_listing/proxy/proxy.txt"
+        self.api_key = open("proxy/proxy.txt").read().strip() 
         self.headers = {
             'accept': '*/*',
             'accept-language': 'en',
@@ -134,7 +134,6 @@ class ReverbSpider(Spider):
 
         for item in listings[:2]:
             litem = OrderedDict()
-            #litem['ID'] = item.get('id', '')
             litem['Handle'] = item.get('slug', '').strip()
             litem['Title'] = item.get('title', '').strip()
             litem['Body (HTML)'] = ''
@@ -161,7 +160,7 @@ class ReverbSpider(Spider):
             litem['Image Alt Text'] = ''
             litem['Gift Card'] = 'False'
             litem['SEO Title'] = litem.get('Title', '')
-            litem['SEO Description'] = ''   #' '.join(response.css('div.item2-description__content *::text').getall()).strip()[:320]
+            litem['SEO Description'] = ''   
             litem['Google Shopping / Google Product Category'] = ''
             litem['Google Shopping (Unstructured metafield)'] = ''
             litem['Google Shopping / Age Group'] = ''
@@ -179,173 +178,17 @@ class ReverbSpider(Spider):
             litem['Variant Weight Unit'] = ''
             litem['Variant Tax Code'] = ''
             litem['Cost per item'] = ''
-            litem['Status'] = {'sold': 'archived', 'active': 'active', 'draft': 'draft', 'archived': 'archived' }.get(item.get('stateDescription', '').strip().lower(), 'active')
-
-
-            #litem['Model'] = item.get('model', '')
-            #litem['Make'] = item.get('make', '')
-            #litem['State Description'] = item.get('stateDescription', '')
-            #litem['Condition'] = item.get('condition', {}).get('displayName', '')
-            #litem['Price'] = item.get('pricing', {}).get('buyerPrice', {}).get('display', '')
-
-            # shipping_prices = item.get('shipping', {}).get('shippingPrices', [])
-            # if shipping_prices and isinstance(shipping_prices[0], dict):
-            #     litem['Shipping Price'] = shipping_prices[0].get('rate', {}).get('display', '')
-            # else:
-            #     litem['Shipping Price'] = ''
-
-            #litem['Address'] = item.get('shop', {}).get('address', {}).get('displayLocation', '')
+            litem['Status'] = {'sold': 'archived', 'active': 'active', 'draft': 'draft', 'archived': 'archived' }.get(
+                                                            item.get('stateDescription', '').strip().lower(), 'active')
             litem['URL'] = f"{self.base_url}/item/{litem.get('Variant SKU', '')}-{item.get('slug', '')}?show_sold=true"
 
             proxy_url = f"https://proxy.scrapeops.io/v1/?api_key={self.api_key}&url={litem.get('URL', '')}"
 
             yield Request(url=proxy_url, headers=self.detail_headers, callback=self.parse_detail, meta={'litem': litem})
 
-    # def parse_detail(self, response):
-    #
-    #     litem = response.meta.get('litem', {})
-    #     ditem = OrderedDict()
-    #
-    #     # litem['ID'] = item.get('id', '')
-    #     ditem['Handle'] = litem.get('Handle', '').strip()
-    #     ditem['Title'] = litem.get('Title', '').strip()
-    #     ditem['Body (HTML)'] = ' '.join(response.css('div.item2-description__content ').getall()).strip()
-    #     ditem['Vendor'] = litem.get('Vendor', '')
-    #     ditem['Type'] = litem.get('Type', '')
-    #     ditem['Tag'] = ''
-    #     ditem['Published'] = litem.get('Published', '')
-    #     ditem['Option1 Name'] = ''  #litem.get('Option1 Name')
-    #     ditem['Option1 Value'] = '' #litem.get('Option1 Value', '')
-    #     ditem['Option2 Name'] = ''  #litem.get('Option2 Name')
-    #     ditem['Option2 Value'] = '' #litem.get('Option2 Value', '')
-    #     ditem['Option3 Name'] = ''  #'Condition'
-    #     ditem['Option3 Value'] = '' #litem.get('Google Shopping / Condition', '')
-    #     ditem['Variant SKU'] = litem.get('Variant SKU', '')
-    #
-    #     product_weight = (weight_match.group(1).strip() if (weight_match := re.search(r'Weight:\s*([0-9\.]+\s*(?:kg|g|lb|lbs|oz))',
-    #                                                                                   ditem.get('Body (HTML)', ''), re.IGNORECASE)) else "")
-    #     ditem['Variant Grams'] = self.in_gram(product_weight)
-    #
-    #     ditem['Variant Inventory Tracker'] = ''
-    #     ditem['Variant Inventory Policy'] = litem.get('Variant Inventory Policy', '')
-    #     ditem['Variant Fulfillment Service'] = 'manual'
-    #     ditem['Variant Price'] = litem.get('Variant Price', '')
-    #     ditem['Variant Compare At Price'] = litem.get('Variant Price', '')
-    #     ditem['Variant Requires Shipping'] = 'True'
-    #     ditem['Image Src'] = self.clean_image_urls(response)
-    #     ditem['Image Position'] = list(range(1, len(ditem['Image Src']) + 1))
-    #     ditem['Image Alt Text'] = self.get_image_alts(response)
-    #     ditem['Gift Card'] = 'False'
-    #     ditem['SEO Title'] = litem.get('Title', '')
-    #     ditem['SEO Description'] = ''   #' '.join(response.css('div.item2-description__content *::text').getall()).strip()
-    #     ditem['Google Shopping / Google Product Category'] = ' > '.join(response.css('ul.breadcrumbs span[itemprop="name"]::text').getall())
-    #     ditem['Google Shopping (Unstructured metafield)'] = ''
-    #     ditem['Google Shopping / Age Group'] = ''
-    #     ditem['Google Shopping / MPN'] = ''
-    #     ditem['Google Shopping / AdWords Grouping'] = ''
-    #     ditem['Google Shopping / AdWords Labels'] = ''
-    #     ditem['Google Shopping / Condition'] = litem.get('Google Shopping / Condition', '')
-    #     ditem['Google Shopping / Custom Product'] = ''
-    #     ditem['Google Shopping / Custom Label 0'] = ''
-    #     ditem['Google Shopping / Custom Label 1'] = ''
-    #     ditem['Google Shopping / Custom Label 2'] = ''
-    #     ditem['Google Shopping / Custom Label 3'] = ''
-    #     ditem['Google Shopping / Custom Label 4'] = ''
-    #     ditem['Variant Image'] = ''
-    #     units = re.findall(r'Weight:\s*[0-9\.]+\s*([a-zA-Z]+)', ditem.get('Body (HTML)', ''), re.IGNORECASE)
-    #     ditem['Variant Weight Unit'] = ' '.join(u.lower() for u in units) if units else ""
-    #     #for overall weight with number
-    #     # m_weight = re.search(r'Weight:\s*([^<\r\n]+)', ditem.get('Body (HTML)', ''), re.IGNORECASE)
-    #     # ditem['Variant Weight Unit'] = m_weight.group(1).strip() if m_weight else ""
-    #     #ditem['Variant Weight Unit'] = (m.group(1).strip() if (m := re.search(r'Weight:\s*([^<\r\n]+)', ditem.get('Body (HTML)', ''), re.IGNORECASE)) else "")
-    #     # for single unit
-    #     # unit_match = re.search(r'Weight:\s*[0-9\.]+\s*(kg|g|gm|lb|lbs|oz)', ditem.get('Body (HTML)', ''), re.IGNORECASE)
-    #     # ditem['Variant Weight Unit'] = unit_match.group(1).lower() if unit_match else ""
-    #
-    #     # ditem['Variant Tax Code'] = ''
-    #     # ditem['Cost per item'] = ''
-    #     # ditem['Status'] = litem.get('Status', '')
-    #     # ditem['URL'] = litem.get('URL', '')
-    #     # # ditem['Listed'] = response.css('td:contains("Listed") + td::text').get('')
-    #     # # ditem['About'] = ' '.join(response.css('div.item2-description__content *::text').getall()).strip()
-    #     # # ditem['Product Views'] = response.css('div.item2-stats__stat-block:contains("Views")::text').get('').strip()
-    #     # # ditem['Product Watcher'] = response.css('div.item2-stats__stat-block:contains("Watcher")::text').get('').strip()
-    #     # # ditem['Product Offers'] = response.css('div.item2-stats__stat-block:contains("Offers")::text').get('').strip()
-    #     # # ditem['Variant Weight Unit'] = response.css('td:contains("Weight") + td::text').get('')
-    #     # # ditem['Variant Tax Code'] = ''
-    #     #
-    #     #
-    #     # # # Specs dict
-    #     # # ditem['Specs'] = {row.css('td:first-child::text').get('').strip(): ' '.join(row.css('td:last-child *::text').getall()).strip()
-    #     # #                   for row in response.css('div.rc-accordion__content table.spec-list tr') if row.css('td:first-child::text').get('')}
-    #     # #
-    #     # # ditem['Tag'] = ''
-    #     # # ditem['Image URLs'] = [response.urljoin(url) for url in response.css('div.lightbox-image__thumbs img::attr(src)').getall()]
-    #     # # litem['Variant Image'] = [response.urljoin(url) for url in response.css('div.lightbox-image__thumbs img::attr(src)').getall()]
-    #     # # ditem['Image Positions'] = [i + 1 for i in range(len(ditem.get('Image URLs')))]  # 1-based positions
-    #     # # ditem['Image Alt Text'] = [response.urljoin(url) for url in response.css('div.lightbox-image__thumbs img::attr(alt)').getall()]
-    #     # # ditem['Body (HTML)'] = ' '.join(response.css('div.item2-description__content').getall()).strip()
-    #     # # ditem['Google Shopping / Google Product Category'] = ' > '.join(response.css('ul.breadcrumbs span[itemprop="name"]::text').getall())
-    #     #
-    #     # #ditem['Image URLs'] = image_urls
-    #     # image_srcs = ditem.get('Image Src', [])
-    #     # image_positions = ditem.get('Image Position', [])
-    #     # image_alts = ditem.get('Image Alt Text', [])
-    #     #
-    #     # # If variant-specific images exist, use them. Otherwise, use all product images.
-    #     # variant_image = litem.get('Variant Image') or image_srcs
-    #     #
-    #     # if variant_image:
-    #     #     for i, src in enumerate(variant_image, start=1):
-    #     #         ditem_copy = ditem.copy()
-    #     #         ditem_copy['Image Src'] = src
-    #     #         ditem_copy['Image Position'] = i
-    #     #         ditem_copy['Image Alt Text'] = image_alts[i - 1] if i - 1 < len(image_alts) else ""
-    #     #         ditem_copy['Variant Image'] = src  # Shopify expects variant image field
-    #     #         #full_item = {**litem, **ditem_copy}
-    #     #
-    #     #         #self.download_images(full_item)
-    #     #
-    #     #         self.write_to_csv(ditem)
-    #     #         yield ditem
-    #     # else:
-    #     #     # No images found, still yield a record
-    #     #     #full_item = {**litem, **ditem}
-    #     #     self.write_to_csv(ditem)
-    #     #     yield ditem
-    #
-    #     # full_item = {**litem, **ditem}
-    #     # self.download_images(full_item)
-    #     #repeat a record for each image separately
-    #     image_srcs = ditem.get('Image Src', [])
-    #     image_positions = ditem.get('Image Position', [])
-    #     image_alts = ditem.get('Image Alt Text', [])
-    #
-    #     if image_srcs:
-    #         for src, pos, alt in self.extract_images(response):
-    #             #ditem_copy = ditem.copy()
-    #             image_item = OrderedDict()
-    #             image_item['Image Src'] = src
-    #             image_item['Image Position'] = pos
-    #             image_item['Image Alt Text'] = alt
-    #             image_item['Variant Image']  = src
-    #             full_item = {**litem, **ditem_copy}
-    #             #self.download_images(full_item)
-    #             self.write_to_csv(image_item)
-    #             yield full_item
-    #     else:
-    #         full_item = {**litem, **ditem}
-    #         #self.download_images(full_item)
-    #         self.write_to_csv(full_item)
-    #         yield full_item
-    #
-    #     # self.write_to_csv(full_item)
-    #     # yield full_item
-
     def parse_detail(self, response):
         litem = response.meta.get('litem', {})
         ditem = {}
-
         # --- Core product data (same as before) ---
         ditem['Handle'] = litem.get('Handle', '').strip()
         ditem['Title'] = litem.get('Title', '').strip()
@@ -482,10 +325,6 @@ class ReverbSpider(Spider):
             return
 
         try:
-            # Normalize URL if needed
-            # if not img_url.startswith('http'):
-            #     img_url = self.base_url + img_url
-
             response = requests.get(img_url.strip(), timeout=10)
             if response.status_code == 200:
                 # Use proper extension or fallback to .jpg
@@ -548,45 +387,4 @@ class ReverbSpider(Spider):
     #         except Exception as e:
     #             self.logger.error(f"Error downloading {img_url}: {e}")
 
-    # def write_to_csv(self, data: OrderedDict) -> None:
-    #     # ✅ Ensure output folder exists
-    #     os.makedirs(os.path.dirname(self.output_file_name), exist_ok=True)
-    #
-    #     file_exists = os.path.isfile(self.output_file_name)
-    #
-    #     with open(self.output_file_name, 'a', newline='', encoding='utf-8') as csvfile:
-    #         writer = csv.DictWriter(csvfile, fieldnames=data.keys())
-    #
-    #         # ✅ Write header if new file
-    #         if not file_exists or os.path.getsize(self.output_file_name) == 0:
-    #             writer.writeheader()
-    #
-    #         writer.writerow(data)
-        #
-        # # ✅ Count lines to check how many items are written
-        # self.record_count = getattr(self, 'record_count', 0) + 1
-        # if self.record_count >= 10:
-        #     self.logger.info(f"Reached record limit ({self.record_count}). Stopping spider.")
-        #     raise CloseSpider(reason=f"Reached {self.record_count} records limit.")
-
-        # with open(self.output_file_name, 'r', encoding='utf-8') as f:
-        #     lines = f.readlines()
-        #
-        # # Subtract 1 for the header row
-        # record_count = len(lines) - 1
-        #
-        # # ✅ Stop spider after 10 records
-        # if record_count >= 10:
-        #     self.logger.info(f"Reached record limit ({record_count}). Stopping spider.")
-        #     raise CloseSpider(reason=f"Reached {record_count} records limit.")
-
-
-    # def write_to_csv(self, data: OrderedDict) -> None:
-    #     with open(self.output_file_name, 'a', newline='', encoding='utf-8') as csvfile:
-    #         #fieldnames = ['Company Name', 'Address (full address)', 'Phone', 'Website', 'City', 'State', 'URL']
-    #         writer = csv.DictWriter(csvfile, fieldnames=self.columns)
-    #
-    #         if csvfile.tell() == 0:
-    #             writer.writeheader()  # Writes header once
-    #         # Write the data row
-    #         writer.writerow({col:data.get(col) for col in self.columns})
+    
